@@ -21,6 +21,7 @@ public class GiphyService(
             
             if (res is null)
             {
+                memoryCache.Remove(cacheKey);
                 throw new EmptyResponseException(cacheKey);
             }
             
@@ -50,6 +51,7 @@ public class GiphyService(
             
             if (res is null)
             {
+                memoryCache.Remove(cacheKey);
                 throw new EmptyResponseException(cacheKey);
             }
             
