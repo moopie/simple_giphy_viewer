@@ -1,0 +1,5 @@
+@SimpleGiphyViewer.Api_HostAddress = http://localhost:5170
+
+# TODO: Would be nice to be able to test the API, might use LLMs to generate these
+#
+###
