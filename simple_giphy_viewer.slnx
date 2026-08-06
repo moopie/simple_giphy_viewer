@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/SimpleGiphyViewer.Api/SimpleGiphyViewer.Api.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SimpleGiphyViewer.Api.Tests/SimpleGiphyViewer.Api.Tests.csproj" />
+  </Folder>
 </Solution>
