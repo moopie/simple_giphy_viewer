@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using SimpleGiphyViewer.Api.Interfaces;
-using SimpleGiphyViewer.Api.Services;
 
 namespace SimpleGiphyViewer.Api.Controllers;
 
@@ -13,11 +12,14 @@ public class GiphyController(
 {
     [HttpGet]
     [Route("trending")]
-    public async Task<IActionResult> GetTrendingAsync()
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetTrendingAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            var res = await giphyService.GetTrendingAsync();
+            var res = await giphyService.GetTrendingAsync(cancellationToken);
             return Ok(res);
         }
         catch (Exception ex)
@@ -29,11 +31,19 @@ public class GiphyController(
 
     [HttpGet]
     [Route("search/{keyword}")]
-    public async Task<IActionResult> SearchAsync(string keyword)
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> SearchAsync(string keyword, CancellationToken cancellationToken = default)
     {
         try
         {
-            var res = await giphyService.SearchAsync(keyword);
+            var kw = keyword.Trim().ToLower();
+            if (string.IsNullOrEmpty(kw))
+            {
+                return Ok();
+            }
+            var res = await giphyService.SearchAsync(kw, cancellationToken);
             return Ok(res);
         }
         catch (Exception ex)

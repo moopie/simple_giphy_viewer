@@ -1,5 +1,4 @@
-using System.Diagnostics;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using SimpleGiphyViewer.Api.Interfaces;
 using SimpleGiphyViewer.Api.Models;
@@ -7,21 +6,36 @@ using SimpleGiphyViewer.Api.Options;
 
 namespace SimpleGiphyViewer.Api.Clients;
 
-public partial class GiphyClient(
-    HttpClient httpClient,
-    IOptions<GiphyOptions> options,
-    ILogger<GiphyClient> logger
-    ) : IGiphyClient
+public class GiphyClient(HttpClient httpClient, IOptions<GiphyOptions> options, ILogger<GiphyClient> logger)
+    : IGiphyClient
 {
-    public async Task<GiphyResponse?> GetTrendingAsync()
+    private readonly GiphyOptions _options = options.Value;
+
+    public async Task<GiphyResponse?> GetTrendingAsync(CancellationToken cancellationToken = default)
     {
-        httpClient.BaseAddress = new Uri(options.Value.BaseUrl);
-        return await httpClient.GetFromJsonAsync<GiphyResponse>("trending");
+        ArgumentException.ThrowIfNullOrWhiteSpace(_options.ApiKey);
+
+        var query = QueryHelpers.AddQueryString(
+            "v1/gifs/trending",
+            new Dictionary<string, string?>
+            {
+                { "api_key", _options.ApiKey },
+            });
+        return await httpClient.GetFromJsonAsync<GiphyResponse>(query, cancellationToken);
     }
 
-    public async Task<GiphyResponse?> SearchAsync(string keyword)
+    public async Task<GiphyResponse?> SearchAsync(string keyword, CancellationToken cancellationToken = default)
     {
-        httpClient.BaseAddress = new Uri(options.Value.BaseUrl);
-        return await httpClient.GetFromJsonAsync<GiphyResponse>(keyword);
+        ArgumentException.ThrowIfNullOrWhiteSpace(keyword);
+        ArgumentException.ThrowIfNullOrWhiteSpace(_options.ApiKey);
+
+        var query = QueryHelpers.AddQueryString(
+            "v1/gifs/search",
+            new Dictionary<string, string?>
+            {
+                { "q", keyword },
+                { "api_key", _options.ApiKey },
+            });
+        return await httpClient.GetFromJsonAsync<GiphyResponse>(query, cancellationToken);
     }
 }

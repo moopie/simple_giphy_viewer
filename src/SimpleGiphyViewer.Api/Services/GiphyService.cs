@@ -5,58 +5,54 @@ using SimpleGiphyViewer.Api.Models;
 
 namespace SimpleGiphyViewer.Api.Services;
 
-public class GiphyService(IGiphyClient giphyClient, IMemoryCache memoryCache, ILogger<GiphyService> logger)
+public class GiphyService(IGiphyClient giphyClient, ICacheService cacheService, ILogger<GiphyService> logger)
     : IGiphyService
 {
-    public async Task<GiphyResponse> GetTrendingAsync()
+    public async Task<GiphyResponse> GetTrendingAsync(CancellationToken cancellationToken = default)
     {
-        var cacheKey = "giphy:trending";
-        if (!memoryCache.TryGetValue<GiphyResponse>(cacheKey, out var res))
-        {
-            if (res is null)
-            {
-                memoryCache.Remove(cacheKey);
-                throw new EmptyResponseException(cacheKey);
-            }
+        const string cacheKey = "giphy:trending";
+        
+        var cached = await cacheService.GetAsync<GiphyResponse>(cacheKey, cancellationToken);
 
-            logger.LogInformation("Got trending from cache");
-            return res;
+        if (cached is not null)
+        {
+            return cached;
         }
 
-        var response = await giphyClient.GetTrendingAsync();
+        var response = await giphyClient.GetTrendingAsync(cancellationToken);
         if (response is null)
         {
             throw new EmptyResponseException(cacheKey);
         }
 
         logger.LogInformation("Storing trending in cache");
-        memoryCache.Set(cacheKey, response, TimeSpan.FromMinutes(5));
+        
+        await cacheService.SetAsync(cacheKey, response, cancellationToken);
         return response;
     }
 
-    public async Task<GiphyResponse> SearchAsync(string keyword)
+    public async Task<GiphyResponse> SearchAsync(string keyword, CancellationToken cancellationToken = default)
     {
-        var cacheKey = $"giphy:search:{keyword}";
-        if (!memoryCache.TryGetValue<GiphyResponse>(cacheKey, out var res))
-        {
-            if (res is null)
-            {
-                memoryCache.Remove(cacheKey);
-                throw new EmptyResponseException(cacheKey);
-            }
+        var kw = keyword.Trim().ToLower();
+        ArgumentException.ThrowIfNullOrEmpty(kw);
 
-            logger.LogInformation("Got '{Keyword}' from cache", keyword);
-            return res;
+        var cacheKey = $"giphy:search:{kw}";
+        
+        var cached = await cacheService.GetAsync<GiphyResponse>(cacheKey, cancellationToken);
+
+        if (cached is not null)
+        {
+            return cached;
         }
 
-        var response = await giphyClient.SearchAsync(keyword);
+        var response = await giphyClient.SearchAsync(kw, cancellationToken);
         if (response is null)
         {
             throw new EmptyResponseException(cacheKey);
         }
 
-        logger.LogInformation("Storing '{Keyword}' in cache", keyword);
-        memoryCache.Set(cacheKey, response, TimeSpan.FromMinutes(5));
+        logger.LogInformation("Storing '{kw}' in cache", kw);
+        await cacheService.SetAsync(cacheKey, response, cancellationToken);
         return response;
     }
 }

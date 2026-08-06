@@ -1,3 +1,5 @@
+using System.Text.Json;
+using Microsoft.Extensions.Options;
 using SimpleGiphyViewer.Api.Clients;
 using SimpleGiphyViewer.Api.Interfaces;
 using SimpleGiphyViewer.Api.Options;
@@ -8,19 +10,34 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
-// Ideally redis/valkey will replace this but for a demo it's good enough (i hope?)
-builder.Services.AddMemoryCache();
+// TODO: replace with redis/valkey
+// for when there are more than 1 service consuming said cache
+builder.Services.AddMemoryCache(options =>
+{
+   options.SizeLimit = 1_000; // Don't want the cache to hog all the memory
+});
+
+builder.Services.AddSingleton<ICacheService, MemoryCacheService>();
 
 builder.Services.AddTransient<IGiphyService, GiphyService>();
 
-builder.Services.AddHttpClient<IGiphyClient, GiphyClient>();
+builder.Services.AddHttpClient<IGiphyClient, GiphyClient>((serviceProvider, client) =>
+{
+    var options = serviceProvider.GetRequiredService<IOptions<GiphyOptions>>().Value;
+    
+    client.BaseAddress = new Uri(options.BaseUrl);
+});
+
+builder.Services.ConfigureHttpJsonOptions((options) =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+});
 
 builder.Services.Configure<GiphyOptions>(
     builder.Configuration.GetSection(GiphyOptions.SectionName));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
