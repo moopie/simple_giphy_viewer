@@ -26,7 +26,7 @@ export class GiphyApi {
 
   async search(query: string): Promise<Gif[]> {
     if (!query) {
-      this.trending();
+      return this.trending();
     }
 
     const params = new URLSearchParams({keyword: query});
