@@ -15,6 +15,7 @@ To use this app you need to set your Giphy API key
 $ dotnet user-secrets set "Giphy:ApiKey" "your-api-key" --project src/SimpleGiphyViewer.Api
 ```
 
-# AI Disclosure
+## AI Disclosure
 
-LLM was used during the planning phase
+LLM was used during the planning phase, and to generate giphy response types
+and to generate github actions

@@ -1,0 +1,40 @@
+name: API Unit Tests
+
+on:
+  pull_request:
+    paths:
+      - "src/SimpleGiphyViewer.Api/**"
+      - "tests/SimpleGiphyViewer.Api.Tests/**"
+      - "simple_giphy_viewer.slnx"
+      - ".github/workflows/api-unit-tests.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "src/SimpleGiphyViewer.Api/**"
+      - "tests/SimpleGiphyViewer.Api.Tests/**"
+      - "simple_giphy_viewer.slnx"
+      - ".github/workflows/api-unit-tests.yml"
+
+jobs:
+  api-unit-tests:
+    name: API unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore tests/SimpleGiphyViewer.Api.Tests/SimpleGiphyViewer.Api.Tests.csproj
+
+      - name: Build
+        run: dotnet build tests/SimpleGiphyViewer.Api.Tests/SimpleGiphyViewer.Api.Tests.csproj --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test tests/SimpleGiphyViewer.Api.Tests/SimpleGiphyViewer.Api.Tests.csproj --configuration Release --no-build --verbosity normal
