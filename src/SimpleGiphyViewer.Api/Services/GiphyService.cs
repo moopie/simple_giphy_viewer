@@ -21,6 +21,9 @@ public class GiphyService(IGiphyClient giphyClient, ICacheService cacheService, 
             return cached;
         }
 
+        // TODO: Replace semaphores with hybrid cache
+        // now you might ask why didn't I use hybrid cache from the start?
+        // style points mostly
         var sem = _locks.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
 
         await sem.WaitAsync(cancellationToken);

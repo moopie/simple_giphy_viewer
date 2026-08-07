@@ -4,6 +4,6 @@ namespace SimpleGiphyViewer.Api.Interfaces;
 
 public interface IGiphyService
 {
-    Task<GiphyResponse> GetTrendingAsync(CancellationToken cancellationToken);
-    Task<GiphyResponse> SearchAsync(string keyword, CancellationToken cancellationToken);
+    Task<GiphyResponse> GetTrendingAsync(CancellationToken cancellationToken = default);
+    Task<GiphyResponse> SearchAsync(string keyword, CancellationToken cancellationToken = default);
 }

@@ -8,7 +8,12 @@ using SimpleGiphyViewer.Api.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+        options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -31,9 +36,10 @@ builder.Services.AddHttpClient<IGiphyClient, GiphyClient>((serviceProvider, clie
     client.BaseAddress = new Uri(options.BaseUrl);
 });
 
-builder.Services.ConfigureHttpJsonOptions((options) =>
+builder.Services.AddSingleton(new JsonSerializerOptions(JsonSerializerDefaults.Web)
 {
-    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+    DictionaryKeyPolicy =  JsonNamingPolicy.SnakeCaseLower,
 });
 
 builder.Services.Configure<GiphyOptions>(

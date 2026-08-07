@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using SimpleGiphyViewer.Api.Interfaces;
@@ -6,7 +7,10 @@ using SimpleGiphyViewer.Api.Options;
 
 namespace SimpleGiphyViewer.Api.Clients;
 
-public class GiphyClient(HttpClient httpClient, IOptions<GiphyOptions> options, ILogger<GiphyClient> logger)
+public class GiphyClient(
+    HttpClient httpClient,
+    IOptions<GiphyOptions> options,
+    JsonSerializerOptions jsonOptions)
     : IGiphyClient
 {
     private readonly GiphyOptions _options = options.Value;
@@ -21,7 +25,7 @@ public class GiphyClient(HttpClient httpClient, IOptions<GiphyOptions> options, 
             {
                 { "api_key", _options.ApiKey },
             });
-        return await httpClient.GetFromJsonAsync<GiphyResponse>(query, cancellationToken);
+        return await httpClient.GetFromJsonAsync<GiphyResponse>(query, jsonOptions, cancellationToken);
     }
 
     public async Task<GiphyResponse?> SearchAsync(string keyword, CancellationToken cancellationToken = default)
@@ -36,6 +40,6 @@ public class GiphyClient(HttpClient httpClient, IOptions<GiphyOptions> options, 
                 { "q", keyword },
                 { "api_key", _options.ApiKey },
             });
-        return await httpClient.GetFromJsonAsync<GiphyResponse>(query, cancellationToken);
+        return await httpClient.GetFromJsonAsync<GiphyResponse>(query, jsonOptions, cancellationToken);
     }
 }
