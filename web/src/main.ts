@@ -1,4 +1,4 @@
-import {GiphyApi} from "./api"
+import {GiphyApi, type Gif} from "./api"
 import './style.css'
 
 const form = document.querySelector<HTMLFormElement>("form")!;
@@ -13,13 +13,6 @@ form.addEventListener("submit", async (event: SubmitEvent) => {
 
   const query = input.value.trim();
 
-  if (!query) {
-    status.textContent = "Enter a search term";
-    results.innerHTML = "";
-  }
-
-  
-  
   status.innerText = "Searching...";
   results.innerHTML = "";
 

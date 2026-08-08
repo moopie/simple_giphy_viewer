@@ -16,7 +16,11 @@ export type GifResponse = {
 };
 
 export class GiphyApi {
-  constructor(private readonly baseUrl: string = "/api/v1") {}
+  private readonly baseUrl: string;
+
+  constructor(baseUrl: string = "/api/v1") {
+    this.baseUrl = baseUrl;
+  }
 
   async trending(): Promise<Gif[]> {
     const data = await this.get<GifResponse>("/trending");
@@ -25,13 +29,11 @@ export class GiphyApi {
   }
 
   async search(query: string): Promise<Gif[]> {
-    if (!query) {
+    if (query.trim() === "") {
       return this.trending();
     }
 
-    const params = new URLSearchParams({keyword: query});
-
-    const data = await this.get<GifResponse>(`/search/${params}`);
+    const data = await this.get<GifResponse>(`/search/${encodeURIComponent(query)}`);
     
     return data.data;
   }
