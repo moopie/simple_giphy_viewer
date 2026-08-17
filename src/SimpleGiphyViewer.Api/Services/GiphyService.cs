@@ -8,7 +8,7 @@ namespace SimpleGiphyViewer.Api.Services;
 public class GiphyService(IGiphyClient giphyClient, ICacheService cacheService, ILogger<GiphyService> logger)
     : IGiphyService
 {
-    private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
+    private static ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
 
     public async Task<GiphyResponse> GetTrendingAsync(CancellationToken cancellationToken = default)
     {
