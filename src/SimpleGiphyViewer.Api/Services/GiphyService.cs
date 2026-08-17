@@ -53,6 +53,10 @@ public class GiphyService(IGiphyClient giphyClient, ICacheService cacheService, 
         finally
         {
             sem.Release();
+            if (sem.CurrentCount == 1)
+            {
+                _locks.TryRemove(cacheKey, out _);
+            }
         }
     }
 
@@ -95,6 +99,10 @@ public class GiphyService(IGiphyClient giphyClient, ICacheService cacheService, 
         finally
         {
             sem.Release();
+            if (sem.CurrentCount == 1)
+            {
+                _locks.TryRemove(cacheKey, out _);
+            }
         }
     }
 }

@@ -27,11 +27,12 @@ builder.Services.AddMemoryCache(options =>
 
 builder.Services.AddSingleton<ICacheService, MemoryCacheService>();
 
-builder.Services.AddTransient<IGiphyService, GiphyService>();
+builder.Services.AddScoped<IGiphyService, GiphyService>();
 
 builder.Services.AddHttpClient<IGiphyClient, GiphyClient>((serviceProvider, client) =>
 {
     var options = serviceProvider.GetRequiredService<IOptions<GiphyOptions>>().Value;
+    ArgumentException.ThrowIfNullOrWhiteSpace(options.ApiKey);
     
     client.BaseAddress = new Uri(options.BaseUrl);
 });
